@@ -1,0 +1,2 @@
+# Confra
+Ansible configuration management
