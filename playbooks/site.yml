@@ -1,0 +1,14 @@
+---
+- name: Configure and deploy web server
+  hosts: web
+  become: true  # run tasks as root
+  vars:
+    app_repo_url: "https://github.com/your-org/your-app-repo.git"
+    app_path: "/opt/prosaurus"
+    docker_compose_file: "docker-compose.production.yml"
+
+  roles:
+    - common         # Optional: update packages, install base tools
+    - docker         # Install Docker + docker-compose
+    - nginx          # Install and configure NGINX
+    - deploy_app     # Clone app repo and run docker-compose

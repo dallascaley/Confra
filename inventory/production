@@ -1,0 +1,7 @@
+(generic example below)
+
+[web]
+44.225.148.34 ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/id_rsa
+
+[db]
+44.225.148.35 ansible_user=ubuntu
