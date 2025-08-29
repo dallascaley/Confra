@@ -1,0 +1,10 @@
+- name: Clone app repo
+  git:
+    repo: https://github.com/your-org/your-app-repo.git
+    dest: /opt/your-app
+    version: main
+
+- name: Run docker-compose
+  command: docker-compose -f /opt/your-app/docker-compose.prod.yml up -d
+  args:
+    chdir: /opt/your-app
