@@ -170,9 +170,9 @@ That's a great question, and it's an important detail that clears up a lot of co
 
 🔹 Summary
 
-  Feature	What                      Triggers Loading
-  group_vars/<groupname>.yml	      File name matches group name
-  host_vars/<hostname>.yml	        File name matches host name
+  Feature ---------------------------------- What Triggers Loading
+  group_vars/<groupname>.yml --------------- File name matches group name
+  host_vars/<hostname>.yml ----------------- File name matches host name
 
 File content	Has no effect on loading
 
@@ -258,11 +258,11 @@ Let’s break down host_vars/ in a clear way:
 
 🔹 Summary
 
-Concept	                          Location	          File Name Rule
-Group vars	                      group_vars/	        Matches [groupname] in inventory
-Host vars	                        host_vars/	        Matches hostname in inventory
-Match is case-sensitive	          ✅	                Yes
-File content used to match?	      ❌	                No — filenames only
+Concept	------------------------- Location ----------- File Name Rule
+Group vars ---------------------- group_vars/ -------- Matches [groupname] in inventory
+Host vars	----------------------- host_vars/ --------- Matches hostname in inventory
+Match is case-sensitive	--------- ✅ ---------------- Yes
+File content used to match?	----- ❌ ---------------- No — filenames only
 
 Let me know if you want to dive into:
 
