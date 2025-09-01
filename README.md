@@ -358,3 +358,97 @@ Instead, the best practice is to run Ansible remotely (from your local machine o
   * Add an Ansible playbook that performs all the setup that was previously in user_data.
 
 Let me know if you want help writing that inventory setup, playbook, or wiring Terraform to Ansible.
+
+
+Day 4 stuff
+
+Here is a list of other dependencies i might need depending on the situation (beyond python3)
+
+🔹 Common Additional Dependencies (on the target machine):
+
+| Dependency	             | Why You Might Need It                                             |
+|--------------------------|-------------------------------------------------------------------|
+| sudo	                   | Needed if you're using Ansible with become: true                  |
+| rsync	                   | Used by some Ansible roles that sync files                        |
+| curl / wget	             | Used by provisioning tasks or install scripts                     |
+| unzip                    | Often needed when working with zip archives (e.g., AWS CLI)       |
+| bash                     | Some playbooks/scripts assume bash exists (not just sh)           |
+| Cloud-init tools         | Sometimes useful to avoid conflicts with user_data provisioning   |
+
+✅ How Do I Get Terraform to Output the SSH Key?
+
+First: Understand the context
+
+  There are two SSH-related things you care about:
+
+    1. The private key — used to connect from your Ansible control node.
+    2. The public key — injected into EC2 via Terraform so it can be used for login.
+
+🧩 Option 1: Use an Existing Key Pair (recommended for most cases)
+
+  If you already have a key pair:
+
+    resource "aws_key_pair" "deployer" {
+      key_name   = "my-key"
+      public_key = file("~/.ssh/my-key.pub")
+    }
+
+    output "ssh_key_name" {
+      value = aws_key_pair.deployer.key_name
+    }
+
+  Then in your EC2 instance:
+
+    resource "aws_instance" "example" {
+      ami           = "ami-0xyz"
+      instance_type = "t2.micro"
+      key_name      = aws_key_pair.deployer.key_name
+      ...
+    }
+
+  You don’t need to output the private key here — just make sure Ansible knows where it is locally (e.g., ~/.ssh/my-key).
+
+🧩 Option 2: Generate SSH Key Pair Within Terraform (not ideal for production)
+
+  If you want Terraform to generate a new key pair dynamically:
+
+    resource "tls_private_key" "example" {
+      algorithm = "RSA"
+      rsa_bits  = 4096
+    }
+
+    resource "aws_key_pair" "generated" {
+      key_name   = "terraform-generated-key"
+      public_key = tls_private_key.example.public_key_openssh
+    }
+
+    output "private_key_pem" {
+      value     = tls_private_key.example.private_key_pem
+      sensitive = true
+    }
+
+  This outputs the private key (private_key_pem) which you can use in automation to connect to the EC2 instances (e.g., via Ansible). Store it securely.
+
+🧪 Example Ansible Inventory (using Terraform output)
+
+  If you output EC2 IPs and key paths from Terraform like this:
+
+  output "ec2_public_ip" {
+    value = aws_instance.example.public_ip
+  }
+
+  output "ssh_key_path" {
+    value = "${path.module}/my-key.pem"
+  }
+
+  You can dynamically generate an Ansible inventory file or use dynamic inventory scripts
+
+✅ Summary
+
+| Purpose	                    | Tool	              | What to Do                           |
+|-----------------------------|---------------------|--------------------------------------|
+| Install Ansible deps        | Ansible             | Use apt, yum, or dnf to install them |
+| SSH public key to EC2       | Terraform           | Use aws_key_pair resource            |
+| SSH private key for Ansible | Terraform or manual | Output private_key_pem if generated, or reference a file manually |
+
+Let me know if you want a full working example (Terraform + Ansible).
