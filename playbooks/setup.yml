@@ -1,0 +1,20 @@
+---
+- name: Breakroom EC2 Setup
+  hosts: breakroom
+  become: true
+  tasks:
+    - name: Ensure Python 3 is installed (redundant, but safe)
+      yum:
+        name: python3
+        state: present
+
+    - name: Install NGINX
+      yum:
+        name: nginx
+        state: present
+
+    - name: Start NGINX service
+      service:
+        name: nginx
+        state: started
+        enabled: true
