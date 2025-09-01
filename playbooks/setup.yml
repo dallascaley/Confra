@@ -8,6 +8,9 @@
         name: python3
         state: present
 
+    - name: Enable NGINX via amazon-linux-extras
+      command: amazon-linux-extras enable nginx1
+
     - name: Install NGINX
       yum:
         name: nginx
