@@ -452,3 +452,24 @@ First: Understand the context
 | SSH private key for Ansible | Terraform or manual | Output private_key_pem if generated, or reference a file manually |
 
 Let me know if you want a full working example (Terraform + Ansible).
+
+Final updates...  (9-1-2025)
+
+I pretty much have it working at the moment.  I had to change a couple of things.  Here is how it works
+
+1) In the Minfra repo, build the infrastructure:
+
+   terraform init
+   terraform apply
+  
+2) Get into wsl by opening a terminal
+
+   wsl
+
+3) go to the correct directory (this is my directory yours may be different)
+
+   cd /mnt/c/Users/dalla/Repo/Confra
+
+4) Run the playbook
+
+   ansible-playbook -i inventory/production playboos/setup.yml
