@@ -90,6 +90,23 @@
       become: false
       become_user: ec2-user
 
+    - name: Create NGINX config directory
+      file:
+        path: /home/ec2-user/backend/etc/nginx
+        state: directory
+        recurse: yes
+        owner: ec2-user
+        group: ec2-user
+        mode: '0755'
+
+    - name: Download NGINX config
+      get_url:
+        url: https://raw.githubusercontent.com/dallascaley/Breakroom/main/backend/etc/nginx/nginx-production.conf
+        dest: /home/ec2-user/backend/etc/nginx/nginx-production.conf
+        owner: ec2-user
+        group: ec2-user
+        mode: '0644'
+
     - name: Download docker-compose.production.yml
       get_url:
         url: https://raw.githubusercontent.com/dallascaley/Breakroom/main/docker-compose.production.yml
