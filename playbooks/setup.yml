@@ -70,3 +70,88 @@
       command: /usr/local/bin/docker-compose --version
       register: docker_compose_check
       changed_when: false
+
+    - name: Install Git and AWS CLI
+      yum:
+        name:
+          - git
+          - awscli
+        state: present
+
+    - name: Clone the Breakroom repo
+      git:
+        repo: https://github.com/dallascaley/Breakroom.git
+        dest: /home/ec2-user/Breakroom
+        version: main
+        force: yes
+      become: false
+      become_user: ec2-user
+
+    - name: Create secrets directory
+      file:
+        path: /home/ec2-user/backend/etc/encrypt
+        state: directory
+        recurse: yes
+        owner: ec2-user
+        group: ec2-user
+        mode: '0755'
+
+    - name: Download secrets archive from S3
+      command: aws s3 cp s3://breakroom-secrets/encrypt.tar.gz /home/ec2-user/encrypt.tar.gz
+      become: false
+      become_user: ec2-user
+
+    - name: Extract secrets archive
+      unarchive:
+        src: /home/ec2-user/encrypt.tar.gz
+        dest: /home/ec2-user/backend/etc/encrypt
+        remote_src: yes
+        extra_opts: [--strip-components=1]
+      become: false
+      become_user: ec2-user
+
+    - name: Create NGINX config directory
+      file:
+        path: /home/ec2-user/backend/etc/nginx
+        state: directory
+        recurse: yes
+        owner: ec2-user
+        group: ec2-user
+        mode: '0755'
+
+    - name: Download NGINX config
+      get_url:
+        url: https://raw.githubusercontent.com/dallascaley/Breakroom/main/backend/etc/nginx/nginx-production.conf
+        dest: /home/ec2-user/backend/etc/nginx/nginx-production.conf
+        owner: ec2-user
+        group: ec2-user
+        mode: '0644'
+
+    - name: Download docker-compose.production.yml
+      get_url:
+        url: https://raw.githubusercontent.com/dallascaley/Breakroom/main/docker-compose.production.yml
+        dest: /home/ec2-user/docker-compose.production.yml
+        owner: ec2-user
+        group: ec2-user
+        mode: '0644'
+
+    - name: Pull Docker images using Compose (with sudo)
+      command: sudo /usr/local/bin/docker-compose -f /home/ec2-user/docker-compose.production.yml pull
+      become: false
+      become_user: ec2-user
+      args:
+        chdir: /home/ec2-user
+
+    - name: Stop and disable system NGINX to free up port 80
+      service:
+        name: nginx
+        state: stopped
+        enabled: false
+
+    - name: Start Docker containers using Compose (with sudo)
+      command: sudo /usr/local/bin/docker-compose -f /home/ec2-user/docker-compose.production.yml up -d
+      become: false
+      become_user: ec2-user
+      args:
+        chdir: /home/ec2-user
+

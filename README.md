@@ -470,6 +470,10 @@ I pretty much have it working at the moment.  I had to change a couple of things
 
    cd /mnt/c/Users/dalla/Repo/Confra
 
+  3a) Optional, If you have recreated your terraform config only, you might need to kill your key and re-accept the new one
+
+     ssh-keygen -f "/home/dallas/.ssh/known_hosts" -R "44.225.148.34"
+
 4) Run the playbook
 
    ansible-playbook -i inventory/production playboos/setup.yml
