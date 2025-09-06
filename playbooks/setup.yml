@@ -7,25 +7,6 @@
         name: python3
         state: present
 
-    - name: Enable NGINX repo (Amazon Linux 2)
-      shell: |
-        amazon-linux-extras enable nginx1
-        yum clean metadata
-      become: true
-
-    - name: Install NGINX
-      yum:
-        name: nginx
-        state: present
-      become: true
-
-    - name: Start NGINX service
-      service:
-        name: nginx
-        state: started
-        enabled: true
-      become: true
-
     - name: Install Docker
       yum:
         name: docker
@@ -64,7 +45,6 @@
       file:
         path: /usr/local/bin/docker-compose
         mode: '0755'
-
 
     - name: Verify docker-compose installation
       command: /usr/local/bin/docker-compose --version
@@ -110,23 +90,6 @@
       become: false
       become_user: ec2-user
 
-    - name: Create NGINX config directory
-      file:
-        path: /home/ec2-user/backend/etc/nginx
-        state: directory
-        recurse: yes
-        owner: ec2-user
-        group: ec2-user
-        mode: '0755'
-
-    - name: Download NGINX config
-      get_url:
-        url: https://raw.githubusercontent.com/dallascaley/Breakroom/main/backend/etc/nginx/nginx-production.conf
-        dest: /home/ec2-user/backend/etc/nginx/nginx-production.conf
-        owner: ec2-user
-        group: ec2-user
-        mode: '0644'
-
     - name: Download docker-compose.production.yml
       get_url:
         url: https://raw.githubusercontent.com/dallascaley/Breakroom/main/docker-compose.production.yml
@@ -141,12 +104,6 @@
       become_user: ec2-user
       args:
         chdir: /home/ec2-user
-
-    - name: Stop and disable system NGINX to free up port 80
-      service:
-        name: nginx
-        state: stopped
-        enabled: false
 
     - name: Start Docker containers using Compose (with sudo)
       command: sudo /usr/local/bin/docker-compose -f /home/ec2-user/docker-compose.production.yml up -d
