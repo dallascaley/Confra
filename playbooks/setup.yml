@@ -7,21 +7,24 @@
         name: python3
         state: present
 
-    - name: Enable NGINX via amazon-linux-extras
-      command: amazon-linux-extras enable nginx1
-      args:
-        creates: /etc/yum.repos.d/amzn2-extras.repo  # avoid running every time
+    - name: Enable NGINX repo (Amazon Linux 2)
+      shell: |
+        amazon-linux-extras enable nginx1
+        yum clean metadata
+      become: true
 
     - name: Install NGINX
       yum:
         name: nginx
         state: present
+      become: true
 
     - name: Start NGINX service
       service:
         name: nginx
         state: started
         enabled: true
+      become: true
 
     - name: Install Docker
       yum:
@@ -57,7 +60,13 @@
         mode: '0755'
       when: docker_compose_version is defined
 
+    - name: Ensure docker-compose is executable
+      file:
+        path: /usr/local/bin/docker-compose
+        mode: '0755'
+
+
     - name: Verify docker-compose installation
-      command: docker-compose --version
+      command: /usr/local/bin/docker-compose --version
       register: docker_compose_check
       changed_when: false

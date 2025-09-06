@@ -462,9 +462,9 @@ I pretty much have it working at the moment.  I had to change a couple of things
    terraform init
    terraform apply
   
-2) Get into wsl by opening a terminal
+2) Get into wsl by opening a PowerShell terminal
 
-   wsl
+   wsl.exe -d Ubuntu
 
 3) go to the correct directory (this is my directory yours may be different)
 
